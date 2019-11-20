@@ -16,7 +16,7 @@ jobs:
       - run:
           name: Build WAR
           command: |
-            cd webapp/csye6225_lambda
+            cd csye6225_lambda
             rm -rf build
             chmod +x gradlew
             ./gradlew clean build
@@ -26,7 +26,7 @@ jobs:
           command: |
             mkdir artifacts
             chmod 777 lambda_artifacts
-            zip -r lambda-${CIRCLE_BUILD_NUM}.zip webapp/csye6225_lambda/build/libs/csye6225_lambda-0.0.1-SNAPSHOT.war appspec.yml infrastructure/aws/codedeploy/cloudwatch-config.json infrastructure/aws/codedeploy/*.sh 
+            zip -r lambda-${CIRCLE_BUILD_NUM}.zip csye6225_lambda/build/libs/csye6225_lambda-0.0.1-SNAPSHOT.war appspec.yml infrastructure/aws/codedeploy/cloudwatch-config.json infrastructure/aws/codedeploy/*.sh 
             pwd
             ls -al
             chmod 777 lambda-${CIRCLE_BUILD_NUM}.zip

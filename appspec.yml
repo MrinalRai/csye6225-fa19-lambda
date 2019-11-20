@@ -2,7 +2,7 @@ version: 0.0
 os: linux
 
 files:
-  - source: /webapp/csye6225_lambda/build/libs/csye6225_lambda-0.0.1-SNAPSHOT.war
+  - source: /csye6225_lambda/build/libs/csye6225_lambda-0.0.1-SNAPSHOT.war
     destination: /home/centos
   - source: infrastructure/aws/codedeploy/cloudwatch-config.json
     destination: /home/centos
