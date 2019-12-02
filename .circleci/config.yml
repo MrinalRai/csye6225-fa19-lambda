@@ -1,0 +1,41 @@
+version: 2
+jobs:
+  build:
+    docker:
+      # specify the version you desire here
+      - image: circleci/openjdk:8-jdk
+    steps:
+      - checkout
+      - run:
+          name: Install Package requirements
+          command: |
+            sudo apt-get install epel-release && sudo apt-get install statsd
+            sudo apt-get update && sudo apt-get install wget zip unzip -y
+            sudo apt-get install -y python3-pip
+            sudo pip3 install awscli
+      - run:
+          name: Build WAR
+          command: |
+            cd csye6225_lambda
+            rm -rf build
+            chmod +x gradlew
+            ./gradlew clean build
+            cd ../..
+      - run:
+          name: Build Deployment Artifacts
+          command: |
+            mkdir lambda_artifacts
+            chmod 777 lambda_artifacts
+            zip -r lambda-${CIRCLE_BUILD_NUM}.zip csye6225_lambda/build/libs/csye6225_lambda-0.0.1-SNAPSHOT.war appspec.yml infrastructure/aws/codedeploy/cloudwatch-config.json infrastructure/aws/codedeploy/*.sh 
+            pwd
+            ls -al
+            chmod 777 lambda-${CIRCLE_BUILD_NUM}.zip
+            sudo mv lambda-${CIRCLE_BUILD_NUM}.zip lambda_artifacts/
+            cd lambda_artifacts    
+            ls -al 
+      - run:
+          name: Upload ZIP to S3 bucket
+          command: aws s3 cp lambda_artifacts/lambda-${CIRCLE_BUILD_NUM}.zip s3://lambda.${DOMAIN_NAME}/
+      - run:
+          name: Create Deployment
+          command: aws deploy create-deployment --application-name csye6225-webapp --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name csye6225-webapp-deployment --description "CSYE6225 - Codedeploy" --region=${AWS_REGION} --s3-location bucket=lambda.${DOMAIN_NAME},bundleType=zip,key=lambda-${CIRCLE_BUILD_NUM}.zip
